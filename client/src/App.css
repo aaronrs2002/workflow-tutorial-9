@@ -1,0 +1,146 @@
+/*start here*/
+footer {
+  box-shadow: 0 -4px 3px rgba(0, 0, 0, 0.075);
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+.container,
+.container-fluid {
+  padding-top: 80px;
+}
+
+[data-chart] {
+  background-color: #f8f8f8;
+  border-radius: 5px;
+}
+
+#invoiceAddrWrap img[alt='logo'] {
+  max-width: 150px;
+  height: auto;
+}
+
+div.animated[role="alert"] {
+  margin-top: 5%;
+  position: fixed;
+  z-index: 150;
+  width: 100%;
+}
+
+.error {
+  border: #ff0000 solid 1px;
+}
+
+.hide {
+  display: none;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.block,
+.btn-group.block {
+  width: 100%;
+  padding: 0px
+}
+
+.btn.btn-primary.active,
+.card-title.active {
+  color: yellow !important;
+}
+
+/*start loader animation*/
+/*start loader animation*/
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #333;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/*START PRINT MEDIA*/
+.printOnly {
+  display: none;
+}
+
+
+@media print {
+
+  footer,
+  nav,
+  .noPrint {
+    display: none;
+  }
+
+  body,
+  li {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  .printOnly {
+    display: block;
+  }
+
+
+}
+
+
+.chartHeightMatch {
+  max-height: 355px;
+  overflow-y: auto;
+}
+
+
+/*END PRINT MEDIA*/
+
+.mobileOnly {
+  display: none;
+}
+
+.desktopOnly {
+  display: block;
+}
+
+.printOnly {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  .mobileOnly {
+    display: block;
+  }
+
+  .desktopOnly {
+    display: none;
+  }
+
+
+  .chartHeightMatch {
+    max-height: inherit;
+    overflow-y: inherit;
+
+  }
+
+
+
+}

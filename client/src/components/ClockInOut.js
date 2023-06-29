@@ -5,7 +5,7 @@ import DateSelector from "./DateSelector";
 import StartTimeMenu from "./StartTimeMenu";
 import axios from "axios";
 import TicketList from "./TicketList";
-
+import timestamp from "./timestamp";
 
 const ClockInOut = (props) => {
     let [time, setTime] = useState("");
@@ -79,6 +79,8 @@ const ClockInOut = (props) => {
             usingCurrentTime = Date.parse(year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":00");
         }
 
+
+
         if (inOrOut === "in") {
 
             if (employeeHours !== null) {
@@ -116,6 +118,7 @@ const ClockInOut = (props) => {
                     props.showAlert("That didn't work: " + res.data.message, "danger");
                 } else {
                     props.showAlert("Time added.", "success");
+                    populateFields();
                 }
             }, (error) => {
                 props.showAlert("That didn't work: " + error, "danger");
@@ -256,8 +259,9 @@ const ClockInOut = (props) => {
 
                 for (let i = 0; i < res.data[0].hours.length; i++) {
                     console.log("res.data[0].hours[i].employee: " + res.data[0].hours[i].employee + " - props.userEmail: " + props.userEmail);
-                    if (res.data[0].hours[i].employee === props.userEmail)
-                        tempHours.push({ timeIn: res.data[0].hours[i].timeIn, timeOut: res.data[0].hours[i].timeOut })
+                    if (res.data[0].hours[i].employee === props.userEmail) {
+                        tempHours.push(res.data[0].hours[i]);
+                    }
                 }
                 setTimeClock((timeClock) => tempHours);
                 getTotal(tempHours);
@@ -281,6 +285,14 @@ const ClockInOut = (props) => {
                     document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
                     populateFields();
                 }
+                let currentTime = timestamp();
+                console.log("currentTime: " + currentTime);
+                if (document.querySelector("[name='Timeclock-select-year']")) { document.querySelector("[name='Timeclock-select-year']").value = currentTime.substring(0, 4); }
+                if (document.querySelector("[name='Timeclock-select-month']")) { document.querySelector("[name='Timeclock-select-month'] option[value='" + currentTime.substring(5, 7) + "']").selected = true; }
+                if (document.querySelector("[name='Timeclock-select-day']")) { document.querySelector("[name='Timeclock-select-day'] option[value='" + currentTime.substring(8, 10) + "']").selected = true; }
+                if (document.querySelector("[name='startHour']")) { document.querySelector("[name='startHour'] option[value='" + currentTime.substring(14, 16) + "']").selected = true; }
+                if (document.querySelector("[name='startMinute']")) { document.querySelector("[name='startMinute'] option[value='" + currentTime.substring(17, 19) + "']").selected = true; }
+                if (document.querySelector("[name='startAmPm']")) { document.querySelector("[name='startAmPm'] option[value='" + currentTime.substring(11, 13) + "']").selected = true; }
             }, 500);
             setLoaded((loaded) => true);
         }

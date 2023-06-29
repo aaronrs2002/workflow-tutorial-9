@@ -11,6 +11,15 @@ const TicketBuilder = (props) => {
     let [func, setFunc] = useState("add");
     let [loaded, setLoaded] = useState(false);
     let [confirm, setConfirm] = useState("");
+    let priorityLevels = ["all", "low", "medium", "high", "critical"];
+
+    /*
+                        <option value="default">Select priority level</option>
+                        <option value="low">Low priority</option>
+                        <option value="medium">Medium priority</option>
+                        <option value="high">High priority</option>
+                        <option value="critical">Critical priority</option>
+    */
 
 
     const resetFunction = (whatFunc) => {
@@ -198,10 +207,23 @@ const TicketBuilder = (props) => {
             }, (error) => {
                 props.showAlert("Something didn't work.", "danger");
             }
-
         )
+    }
 
-
+    const filterTickets = () => {
+        let displayLevel = document.querySelector("select[name='priorityFilter']").value;
+        if (displayLevel !== "all") {
+            [].forEach.call(document.querySelectorAll("select[name='ticketList'] option[data-level]"), (e) => {
+                e.classList.add("hide");
+            });
+            [].forEach.call(document.querySelectorAll("select[name='ticketList'] option[data-level='" + displayLevel + "']"), (e) => {
+                e.classList.remove("hide");
+            });
+        } else {
+            [].forEach.call(document.querySelectorAll("select[name='ticketList'] option[data-level]"), (e) => {
+                e.classList.remove("hide");
+            });
+        }
     }
 
 
@@ -221,10 +243,26 @@ const TicketBuilder = (props) => {
         }
     }, []);
 
+
     return (<div className="row">
         {props.ticketInfo !== null ?
-            <div className="col-md-12">
+            <div className="col-md-6">
                 <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
+            </div> : null
+        }
+        {props.ticketInfo !== null ?
+            <div className="col-md-6">
+                <select className="form-control text-capitalize" name="priorityFilter" onChange={() => filterTickets()}>
+                    {priorityLevels ? priorityLevels.map((level, i) => {
+                        let tempText = level;
+                        if (i === 0) {
+                            tempText = "All Level Tickets";
+                        } else {
+                            tempText = tempText + " priority tickets";
+                        }
+                        return (<option key={i} value={level}>{tempText}</option>)
+                    }) : null}
+                </select>
             </div> : null
         }
         <div className="col-md-12">
@@ -242,12 +280,10 @@ const TicketBuilder = (props) => {
                 <DateSelector menu={"due"} />
                 <div className="col-md-12">
                     <input type="text" className="form-control" name="ticketTitle" placeholder="Ticket title" />
-                    <select className="form-control" name="priority">
-                        <option value="default">Select priority level</option>
-                        <option value="low">Low priority</option>
-                        <option value="medium">Medium priority</option>
-                        <option value="high">High priority</option>
-                        <option value="critical">Critical priority</option>
+                    <select className="form-control text-capitalize" name="priority">
+                        {priorityLevels ? priorityLevels.map((level, i) => {
+                            return (<option key={i} value={level}>{level + " priority"}</option>)
+                        }) : null}
                     </select>
                     <select className="form-control" name="bugNewFeature">
                         <option value="default">Is this a bug or new feature?</option>

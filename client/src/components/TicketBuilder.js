@@ -13,15 +13,6 @@ const TicketBuilder = (props) => {
     let [confirm, setConfirm] = useState("");
     let priorityLevels = ["all", "low", "medium", "high", "critical"];
 
-    /*
-                        <option value="default">Select priority level</option>
-                        <option value="low">Low priority</option>
-                        <option value="medium">Medium priority</option>
-                        <option value="high">High priority</option>
-                        <option value="critical">Critical priority</option>
-    */
-
-
     const resetFunction = (whatFunc) => {
         [].forEach.call(document.querySelectorAll("select"), (e) => {
             e.selectedIndex = 0;

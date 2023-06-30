@@ -45,7 +45,54 @@ const ClockInOut = (props) => {
         setTimeClock((timeClock) => tempData);
     }
 
+    const populateFields = () => {
+        getTotal([]);
+        setTimeClock((timeClock) => null);
+        let whichTicket = document.querySelector("[name='ticketList']").value;
+        if (whichTicket === "default") {
+            props.setActiveTicket((activeTicket) => null);
+            sessionStorage.removeItem("activeTicket");
+            return false;
+        }
+        props.setActiveTicket((activeTicket) => whichTicket);
+        sessionStorage.setItem("activeTicket", whichTicket);
+
+        axios.get("api/tickets/grab-ticket/" + whichTicket, props.config).then(
+            (res) => {
+
+                if (!res.data[0].hours) {
+                    props.showAlert("The server responded with: " + JSON.stringify(res), "info");
+                    return false;
+                } else {
+
+
+                    let tempHours = [];
+
+                    console.log("JSON.stringify(res.data[0].hours): " + JSON.stringify(res.data[0].hours));
+                    console.log("(typeof res.data[0].hours): " + (typeof res.data[0].hours));
+                    res.data[0].hours = JSON.parse(res.data[0].hours);
+
+                    for (let i = 0; i < res.data[0].hours.length; i++) {
+                        console.log("res.data[0].hours[i].employee: " + res.data[0].hours[i].employee + " - props.userEmail: " + props.userEmail);
+                        if (res.data[0].hours[i].employee === props.userEmail) {
+                            tempHours.push(res.data[0].hours[i]);
+                        }
+                    }
+                    setTimeClock((timeClock) => tempHours);
+                    getTotal(tempHours);
+                    setEmployeeHours((employeeHours) => tempHours);
+
+                    props.getMessages(whichTicket);
+                }
+
+            }, (error) => {
+                props.showAlert("That didn't work", "danger");
+            }
+        )
+    }
+
     const inOut = (inOrOut, usingCurrentTime) => {
+        setTimeClock((timeClock) => null);
         //data-func="clockOut"
         /* if (inOrOut === "in") {
              document.querySelector("button[data-func='clockOut']").setAttribute("disabled", "false");
@@ -238,42 +285,7 @@ const ClockInOut = (props) => {
 
     // console.log("(typeof timeClock): " + (typeof timeClock));
     // console.log("JSON.stringify(timeClock): " + JSON.stringify(timeClock));
-    const populateFields = () => {
 
-        let whichTicket = document.querySelector("[name='ticketList']").value;
-        if (whichTicket === "default") {
-            props.setActiveTicket((activeTicket) => null);
-            sessionStorage.removeItem("activeTicket");
-            return false;
-        }
-        props.setActiveTicket((activeTicket) => whichTicket);
-        sessionStorage.setItem("activeTicket", whichTicket);
-
-        axios.get("api/tickets/grab-ticket/" + whichTicket, props.config).then(
-            (res) => {
-                let tempHours = [];
-
-                console.log("JSON.stringify(res.data[0].hours): " + JSON.stringify(res.data[0].hours));
-                console.log("(typeof res.data[0].hours): " + (typeof res.data[0].hours));
-                res.data[0].hours = JSON.parse(res.data[0].hours);
-
-                for (let i = 0; i < res.data[0].hours.length; i++) {
-                    console.log("res.data[0].hours[i].employee: " + res.data[0].hours[i].employee + " - props.userEmail: " + props.userEmail);
-                    if (res.data[0].hours[i].employee === props.userEmail) {
-                        tempHours.push(res.data[0].hours[i]);
-                    }
-                }
-                setTimeClock((timeClock) => tempHours);
-                getTotal(tempHours);
-                setEmployeeHours((employeeHours) => tempHours);
-
-                props.getMessages(whichTicket);
-
-            }, (error) => {
-                props.showAlert("That didn't work", "danger");
-            }
-        )
-    }
 
     useEffect(() => {
         if (loaded === false) {
@@ -297,6 +309,8 @@ const ClockInOut = (props) => {
             setLoaded((loaded) => true);
         }
     }, []);
+
+    console.log("JSON.stringify(timeClock): " + JSON.stringify(timeClock));
 
     return (
 
@@ -339,7 +353,7 @@ const ClockInOut = (props) => {
                 </div>
                 <input type="text" name="filter" className="form-control" placeholder="Filter hours" onChange={() => filterHours()} />
                 <ul className="list-group" id="clockInOutWindow">
-                    {(typeof timeClock) === "object" && timeClock.length > 0 ?
+                    {(typeof timeClock) === "object" && timeClock !== null ?
                         timeClock.map((tc, i) => {
                             if (tc.timeOut !== "noTimeYet") {
                                 return (<li className="list-group-item" key={i}>{NumberToTime(tc.timeIn) + " - " + NumberToTime(tc.timeOut) + " Worked: " + ((((tc.timeOut - tc.timeIn) / 1000) / 60) / 60).toFixed(2) + " Hours"}</li>)
@@ -352,7 +366,7 @@ const ClockInOut = (props) => {
                 <hr />
                 <h3 >Total Hours: {totalHours.toFixed(3)}</h3>
             </div>
-            {(typeof timeClock) === "object" && timeClock.length > 0 ?
+            {(typeof timeClock) === "object" && timeClock !== null ?
                 <div className="col-md-12">
                     <HourlyBarChart email={props.userEmail} employeeHours={timeClock} />
                 </div> : <div className="col-md-12"><h2 >{!sessionStorage.getItem("activeTicket") ? "Select a ticket above" : "This ticket has no time posted."}</h2></div>}
@@ -374,14 +388,3 @@ const ClockInOut = (props) => {
 export default ClockInOut;
 
 
-/*
-{"attendeeId":"2023-03-29:aaron@web-presence.biz:smith-wedding:georgia@flores.net",
-"hours":"[{\"timeIn\":1677855600000,\"timeOut\":1677888000000},
-    {\"timeIn\":1677943800000,\"timeOut\":1677976200000},{\"timeIn\":1677762000000,\"timeOut\":1677794400000},
-    {\"timeIn\":1677686400000,\"timeOut\":1677723300000},{\"timeIn\":1678028400000,\"timeOut\":\"noTimeYet\"}]"}
-
-[{"attendeeId":"2023-03-29:aaron@web-presence.biz:smith-wedding:aaron@web-presence.biz","fname":"Aaron","lname":"Smith","phone":"222.333.4444","email":"aaron@web-presence.biz","guest":"true","roleInEvent":"Groom","profileImg":"img/aaronSmithThumb.jpg","sections":"%5B%5D","hours":"%5B%7B%22timeIn%22:1680220800000,%22timeOut%22:1680239700000%7D%5D"}]
-
-%5B%7B%22timeIn%22:1680220800000,%22timeOut%22:1680239700000%7D,%7B%22timeIn%22:1680312600000,%22timeOut%22:%22noTimeYet%22%7D%5D
-
-*/

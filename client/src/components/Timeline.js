@@ -18,7 +18,7 @@ const Timeline = (props) => {
         ],
         options: {
             fill: {
-                colors: ['#F44336', '#E91E63', '#9C27B0', '#008FFB', '#00E396', '#775DD0', '#00E396', '#ED6E5F', '#B0EBF7', '#E1C366', "#AB63F7", "#C3EDBB"]
+                colors: ["#FAF916", "#D6BE0B", "#EBB70C", "#D68F0B", "#F57E00"]
             },
             chart: {
                 height: 350,
@@ -109,8 +109,8 @@ const Timeline = (props) => {
     const grabStepDates = (ticket) => {
 
         let tempData = currentData;
-        let colorNumber = Math.floor(Math.random() * currentData.options.length);
-        let tempColor = currentData.options.fill.colors[colorNumber];
+
+
         //CLIENT SIDE GET INFO BASED ON A SPECIFIC TICKET
         axios.get("/api/workflow/get-workflow/" + ticket, props.config).then(
             (res) => {
@@ -125,6 +125,8 @@ const Timeline = (props) => {
                     }
 
                     for (let i = 0; i < res.data[0].stepsData.length; i++) {
+                        let colorNumber = Math.floor(Math.random() * tempData.options.fill.colors.length);
+
 
                         selectedTimeline.push({
                             x: res.data[0].stepsData[i].stepTitle,
@@ -132,9 +134,10 @@ const Timeline = (props) => {
                                 new Date(res.data[0].stepsData[i].stepStart).getTime(),
                                 new Date(res.data[0].stepsData[i].stepEnd).getTime()
                             ],
-                            fillColor: tempColor
+                            fillColor: tempData.options.fill.colors[colorNumber]
                         });
                     }
+                    //  console.log("JSON.stringify(selectedTimeline): " + JSON.stringify(selectedTimeline));
                     tempData.series[0].data = [...tempData.series[0].data, ...selectedTimeline];
                     tempData.series[0].timelineHeight = selectedTimeline.length * 95;
 
@@ -150,12 +153,15 @@ const Timeline = (props) => {
         let tempData = currentData;
         setPerformingUpdate((performingUpdate) => true);
 
-        let whichTicket = document.querySelector("[name='ticketList']").value
+        let whichTicket = document.querySelector("[name='ticketList']").value;
+
         if (whichTicket === "default") {
             props.setActiveTicket((activeTicket) => null);
             sessionStorage.removeItem("activeTicket");
             return false;
         }
+
+
         props.setActiveTicket((activeTicket) => whichTicket);
         sessionStorage.setItem("activeTicket", whichTicket);
         props.getMessages(whichTicket);
@@ -166,8 +172,20 @@ const Timeline = (props) => {
 
         let starting = whichTicket.substring(0, 10);
         let ending = endYear + "-" + endMonth + "-" + endDay;
-        let colorNumber = Math.floor(Math.random() * tempData.options.length);
-        let tempColor = tempData.options.fill.colors[colorNumber];
+        let ticketLevel = document.querySelector("select[name='ticketList'] option[value='" + whichTicket + "']").getAttribute("data-level");
+
+        if (ticketLevel === "low") {
+            tempData.options.fill.colors = ["#1BCEF5", "#DB00FA", "#711ED6", "#2421EB", "#1E68D6"];
+        }
+        if (ticketLevel === "medium") {
+            tempData.options.fill.colors = ["#F5E414", "#9FD624", "#3EEB28", "#24D666", "#07FAD2"];
+        }
+        if (ticketLevel === "high") {
+            tempData.options.fill.colors = ["#FAF916", "#D6BE0B", "#EBB70C", "#D68F0B", "#F57E00"];
+        }
+        if (ticketLevel === "critical") {
+            tempData.options.fill.colors = ["#FA6D23", "#D62E00", "#EB1400", "#D60023", "#F50098"];
+        }
 
         let selectedTimeline = [{
             x: whichTicket.substring(whichTicket.lastIndexOf(":") + 1),
@@ -175,7 +193,7 @@ const Timeline = (props) => {
                 new Date(starting).getTime(),
                 new Date(ending).getTime()
             ],
-            fillColor: tempColor
+            fillColor: tempData.options.fill.colors[0]
         }];
 
         tempData.series[0].data = selectedTimeline;

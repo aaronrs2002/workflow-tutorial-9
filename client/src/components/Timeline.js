@@ -175,16 +175,16 @@ const Timeline = (props) => {
         let ticketLevel = document.querySelector("select[name='ticketList'] option[value='" + whichTicket + "']").getAttribute("data-level");
 
         if (ticketLevel === "low") {
-            tempData.options.fill.colors = ["#1BCEF5", "#DB00FA", "#711ED6", "#2421EB", "#1E68D6"];
+            tempData.options.fill.colors = ["#4A1EFC", "#1A26D9", "#2968EF", "#1A87D9", "#0FD1FA", "#646FD9", "#64AAD9"];
         }
         if (ticketLevel === "medium") {
-            tempData.options.fill.colors = ["#F5E414", "#9FD624", "#3EEB28", "#24D666", "#07FAD2"];
+            tempData.options.fill.colors = ["#FAD907", "#D9D114", "#C5F021", "#6FD914", "#34FC17", "#BFF06F", "#7DD959"];
         }
         if (ticketLevel === "high") {
-            tempData.options.fill.colors = ["#FAF916", "#D6BE0B", "#EBB70C", "#D68F0B", "#F57E00"];
+            tempData.options.fill.colors = ["#FA5505", "#D96E11", "#F09C20", "#D99C11", "#FCCD14", "#D9AD41", "#D98B41"];
         }
         if (ticketLevel === "critical") {
-            tempData.options.fill.colors = ["#FA6D23", "#D62E00", "#EB1400", "#D60023", "#F50098"];
+            tempData.options.fill.colors = ["#FC2619", "#D9164D", "#F025BF", "#BE16D9", "#9A0AFA", "#BE3CFA", "#F054B5"];
         }
 
         let selectedTimeline = [{

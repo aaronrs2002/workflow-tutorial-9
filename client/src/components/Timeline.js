@@ -172,18 +172,18 @@ const Timeline = (props) => {
 
         let starting = whichTicket.substring(0, 10);
         let ending = endYear + "-" + endMonth + "-" + endDay;
-        let ticketLevel = document.querySelector("select[name='ticketList'] option[value='" + whichTicket + "']").getAttribute("data-level");
+        let priorityLevel = document.querySelector("select[name='ticketList'] option[value='" + whichTicket + "']").getAttribute("data-level");
 
-        if (ticketLevel === "low") {
+        if (priorityLevel === "low") {
             tempData.options.fill.colors = ["#4A1EFC", "#1A26D9", "#2968EF", "#1A87D9", "#0FD1FA", "#646FD9", "#64AAD9"];
         }
-        if (ticketLevel === "medium") {
+        if (priorityLevel === "medium") {
             tempData.options.fill.colors = ["#FAD907", "#D9D114", "#C5F021", "#6FD914", "#34FC17", "#BFF06F", "#7DD959"];
         }
-        if (ticketLevel === "high") {
+        if (priorityLevel === "high") {
             tempData.options.fill.colors = ["#FA5505", "#D96E11", "#F09C20", "#D99C11", "#FCCD14", "#D9AD41", "#D98B41"];
         }
-        if (ticketLevel === "critical") {
+        if (priorityLevel === "critical") {
             tempData.options.fill.colors = ["#FC2619", "#D9164D", "#F025BF", "#BE16D9", "#9A0AFA", "#BE3CFA", "#F054B5"];
         }
 

@@ -8,18 +8,18 @@ import ReactApexChart from 'react-apexcharts';
 
 const HourlyBarChart = (props) => {
 
-    let [categories, setCategories] = useState([]);
-    let [totals, setTotals] = useState([]);
+
+
     let [loaded, setLoaded] = useState(false);
     let year = NumberToTime(new Date()).substring(0, 4);
     let month = NumberToTime(new Date()).substring(5, 7);
     let day = NumberToTime(new Date()).substring(8, 10);
     const months = [{ name: "January", number: "01" }, { name: "February", number: "02" }, { name: "March", number: "03" }, { name: "April", number: "04" }, { name: "May", number: "05" }, { name: "June", number: "06" }, { name: "July", number: "07" }, { name: "August", number: "08" }, { name: "September", number: "09" }, { name: "October", number: "10" }, { name: "November", number: "11" }, { name: "December", number: "12" },];
 
-    var options = {
+    let [options, setOptions] = useState({
 
         series: [{
-            data: totals
+            data: []
             // data: [totals[0], totals[1], totals[2], totals[3], totals[4], totals[5], totals[6], totals[7], totals[8], totals[9], totals[10], totals[11], totals[12], totals[13], totals[14], totals[15], totals[16], totals[17], totals[18], totals[19], totals[20], totals[21], totals[22], totals[23], totals[24], totals[25], totals[26], totals[27]]
         }],
         chart: {
@@ -52,13 +52,14 @@ const HourlyBarChart = (props) => {
             intersect: false
         },
         xaxis: {
-            categories
+            categories: []
         },
-    };
+
+    });
 
     const addUpDayTotals = (data) => {
         console.log("JSON.stringify(data): " + JSON.stringify(data));
-        setTotals((totals) => []);
+        let tempOptions = options;
 
         let daysList = [];
         let daysTotal = [];
@@ -91,10 +92,13 @@ const HourlyBarChart = (props) => {
                         }
                     }
                 }
+                tempOptions.series[0].data = daysTotal;
 
-                setCategories((categories) => daysList);
-                setTotals((totals) => daysTotal);
+                console.log("tempOptions.xaxis.categories: " + tempOptions.xaxis.categories);
+                tempOptions.xaxis.categories = daysList;
+                setOptions((options) => tempOptions);
 
+                //  setCategories((categories) => daysList);
             }//end end date
         } else {
             return false;
@@ -114,7 +118,9 @@ const HourlyBarChart = (props) => {
         }
     });
 
-    console.log("JSON.stringify(options.series): " + JSON.stringify(props.timeClock));
+    console.log("JSON.stringify(options.series[0].data): " + JSON.stringify(options.series[0].data));
+    console.log("JSON.stringify(props.employeeHours): " + JSON.stringify(props.employeeHours));
+
 
     return (
 
@@ -127,7 +133,7 @@ const HourlyBarChart = (props) => {
 
 
 
-            {totals.length > 0 ? <div >
+            {options.series[0].data.length > 0 ? <div >
                 <label>Hours Worked</label>
                 <ReactApexChart options={options} series={options.series} type="bar" />
             </div> : null}

@@ -52,6 +52,7 @@ const WorkFlow = (props) => {
         if (whichTicket === "default") {
             props.showAlert("Wich ticket?", "warning");
             props.setActiveTicket((activeTicket) => null);
+            setStepsData((stepsData) => []);
             sessionStorage.removeItem("activeTicket");
             return false;
         }

@@ -89,7 +89,6 @@ const ClockInOut = (props) => {
     const inOut = (inOrOut, usingCurrentTime) => {
         setTimeClock((timeClock) => null);
         let tempInOrOut = [];
-
         let whichTicket = document.querySelector("[name='ticketList']").value;
         if (whichTicket === "default") {
             props.showAlert("Which ticket?", "warning");

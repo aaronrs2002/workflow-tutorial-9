@@ -14,6 +14,7 @@ const TicketBuilder = (props) => {
     let priorityLevels = ["all", "low", "medium", "high", "critical"];
 
     const resetFunction = (whatFunc) => {
+        props.setActiveTicket((activeTicket) => null);
         [].forEach.call(document.querySelectorAll("select"), (e) => {
             e.selectedIndex = 0;
         });
@@ -175,7 +176,7 @@ const TicketBuilder = (props) => {
     }
 
 
-    const deleteTicket = () => {
+    const deleteTicket = () => {/*THIS FUNCTION ONLY DELETES THE TICKET FROM THE TICKET TABLE. MESSAGES, INVOICES AND WORKFLOW ARE PRESERVED BY DESIGN*/
         let whichTicket = document.querySelector("[name='ticketList']").value;
 
         if (whichTicket === "default") {

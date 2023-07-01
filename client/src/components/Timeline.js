@@ -232,7 +232,7 @@ const Timeline = (props) => {
                     : null}
             </div>
             : null}
-        <div className="col=md-12">
+        <div className="col-md-12">
             <h2>Timeline</h2>
         </div>
         <div className="col-md-12">

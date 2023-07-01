@@ -8,11 +8,6 @@ import TicketList from "./TicketList";
 import timestamp from "./timestamp";
 
 const ClockInOut = (props) => {
-    let [time, setTime] = useState("");
-    let second = 0;
-    let minute = 0;
-    let hour = 0;
-    let [runTimer, setRunTimer] = useState(true);
     let [loaded, setLoaded] = useState(false);
     let [timeClock, setTimeClock] = useState([]);
     let [clockedIn, setClockedIn] = useState(false);
@@ -93,13 +88,6 @@ const ClockInOut = (props) => {
 
     const inOut = (inOrOut, usingCurrentTime) => {
         setTimeClock((timeClock) => null);
-        //data-func="clockOut"
-        /* if (inOrOut === "in") {
-             document.querySelector("button[data-func='clockOut']").setAttribute("disabled", "false");
- 
-         } else {
-             document.querySelector("button[data-func='clockOut']").setAttribute("disabled", "disabled");
-         }*/
         let tempInOrOut = [];
 
         let whichTicket = document.querySelector("[name='ticketList']").value;
@@ -179,112 +167,7 @@ const ClockInOut = (props) => {
 
 
 
-    const addSecond = () => {
 
-        if (runTimer !== false) {
-
-            let tempSecond = Number(second);
-            let tempMinute = Number(minute);
-            let tempHour = Number(hour);
-            tempSecond = second + 1;
-            second = Number(second) + 1;
-            if (tempSecond >= 60) {
-                tempMinute = (Number(tempMinute) + 1);
-                minute = tempMinute;
-                tempSecond = 0;
-                second = 0;
-            }
-            if (tempMinute >= 60) {
-                tempHour = (Number(tempHour) + 1);
-                hour = tempHour;
-                tempMinute = 0;
-                minute = 0;
-            }
-            if (tempSecond < 10) {
-                tempSecond = "0" + tempSecond;
-            }
-            if (tempMinute < 10) {
-                tempMinute = "0" + tempMinute;
-            }
-            if (tempHour < 10) {
-                tempHour = "0" + tempHour;
-            }
-            setTime((time) => tempHour + ":" + tempMinute + ":" + tempSecond); return false;
-        } else {
-            clearInterval(addSecond);
-            return false;
-        }
-
-
-    }
-
-
-
-    const startTimer = (trueFalse) => {
-        if (runTimer !== false) {
-            setRunTimer((runTimer) => true);
-            setInterval(addSecond, 1000)
-        } else {
-            setTime((time) => "");
-            setRunTimer((runTimer) => false);
-            clearInterval(addSecond);
-            console.log("TRIED TO STOP!");
-
-            return false;
-        }
-
-
-    }
-
-
-
-    /* useEffect(() => {
-         if (loaded === false && (typeof employeeHours) === "object" && employeeHours.length > 0) {
- 
-             for (let i = 0; i < employeeHours.length; i++) {
-                 employeeHours[i].timeIn = parseInt(employeeHours[i].timeIn);
- 
-                 if ((typeof employeeHours[i].timeOut) === "number") {
-                     employeeHours[i].timeOut = parseInt(employeeHours[i].timeOut);
-                 }
- 
-             }
- 
-             let tempData = [];
- 
- 
-             for (let i = 0; i < employeeHours.length; i++) {
-                 if (employeeHours[i] && employeeHours[i].timeOut !== "noTimeYet") {
-                     tempData.push(employeeHours[i]);
-                 } else {
-                     console.log("JSON.stringify(employeeHours[i]): " + JSON.stringify(employeeHours[i]));
- 
-                 }
- 
-             }
- 
-             getTotal(tempData);
- 
-             setTimeClock((timeClock) => tempData);
-             //  console.log(tempData[tempData.length - 1].timeOut);
-             if ((typeof tempData[tempData.length - 1].timeOut) !== "number" || tempData[tempData.length - 1].timeOut === null || tempData[tempData.length - 1].timeOut === "noTimeYet") {
-                 console.log("should eb logged in with red button showing to log out")
-                 setClockedIn((clockedIn) => true)
-             } else {
-                 console.log("should BE LOGGED OU WITH GREEEN BUTTON " + JSON.stringify(tempData));
-             }
- 
- 
- 
-             setLoaded((loaded) => true);
-         }
-     });*/
-
-    //[{"timeIn":1648241326300,"timeOut":1648241591265}]
-
-
-    // console.log("(typeof timeClock): " + (typeof timeClock));
-    // console.log("JSON.stringify(timeClock): " + JSON.stringify(timeClock));
 
 
     useEffect(() => {
@@ -309,8 +192,6 @@ const ClockInOut = (props) => {
             setLoaded((loaded) => true);
         }
     }, []);
-
-    console.log("JSON.stringify(timeClock): " + JSON.stringify(timeClock));
 
     return (
 
@@ -371,20 +252,10 @@ const ClockInOut = (props) => {
                     <HourlyBarChart email={props.userEmail} employeeHours={timeClock} />
                 </div> : <div className="col-md-12"><h2 >{!sessionStorage.getItem("activeTicket") ? "Select a ticket above" : "This ticket has no time posted."}</h2></div>}
 
-            <div className="col-md-12 hide">
-                <h2>Clock Timer </h2>
-                <div className="list-group">
-                    {time.length === 0 ? <button className="list-group-item list-group-item-success" onClick={() => startTimer(true)}>Start Timer</button> :
-                        <button className="list-group-item list-group-item-danger" onClick={() => startTimer(false)}>Stop Timer</button>
-                    }
-                </div><h2>Time:{time}</h2>
-                {time.length !== "" ? <button className="btn btn-block" onClick={() => startTimer(false)}>Reset Timer</button> : null}
-            </div>
+
         </div>
     )
 
 }
 
 export default ClockInOut;
-
-

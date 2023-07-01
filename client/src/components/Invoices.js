@@ -30,8 +30,6 @@ const Invoices = (props) => {
     let [itemizedLabels, setItemizedLabels] = useState([]);
     let [itemsSum, setItemsSum] = useState(0);
 
-
-
     const buildItemChart = (theObj) => {
         let tempCosts = [];
         let tempLabels = [];
@@ -40,17 +38,13 @@ const Invoices = (props) => {
             tempLabels.push(theObj[i].itemName);
         }
 
-        console.log("tempCosts: " + tempCosts);
         setItemizedCosts((itemizedCosts) => tempCosts);
         setItemizedLabels((itemizedLabels) => tempLabels);
     }
 
     const calculate = (obj) => {
         let tempCost = 0;
-
-
         for (let i = 0; i < obj.length; i++) {
-
             tempCost = parseFloat(tempCost) + parseFloat(obj[i].itemPrice);
         }
         setPreTaxTotal((preTaxTotal) => tempCost);
@@ -90,7 +84,6 @@ const Invoices = (props) => {
         setPreTaxTotal((preTaxTotal) => tempTotal);
         setItemizedList((itemizedList) => tempList);
         document.querySelector("[name='itemName']").value = "";
-
         document.querySelector("[name='itemPrice']").value = "";
         calculate(tempList);
         buildItemChart(tempList);
@@ -229,6 +222,8 @@ const Invoices = (props) => {
         if (whichTicket === "default") {
             props.setActiveTicket((activeTicket) => null);
             sessionStorage.removeItem("activeTicket");
+            setAmounts((amounts) => []);
+            setLabels((labels) => []);
             return false;
 
         } else {
@@ -305,44 +300,7 @@ const Invoices = (props) => {
         setItemizedList((itemizedList) => savedInvoices[selectedInvoice].itemizedList);
         setPreTaxTotal((preTaxTotal) => savedInvoices[selectedInvoice].preTaxTotal);
         setRecipientInfo((recipientInfo) => savedInvoices[selectedInvoice].invoiceRecipient);
-
-
-
-
-        /*{"invoiceId":"aaron@web-presence.biz:2023-06-15_AM-10-30:50",
-        "itemizedList":[{"itemName":"balloons","itemPrice":3.99},{"itemName":"crayons","itemPrice":9.99},{"itemName":"boogers","itemPrice":3}],
-        "preTaxTotal":"16.98",
-        "invoiceRecipient":" (name): Bootleggas (email): boiot@legga.com (phone): 2224445454 (address): 44 main (city): delta (state): AS (zipCode): 85260",
-        "invoiceDueDate":"2023-11-04","ticketId":"2023-05-15_AM-09-58:33-due-2023-11-09:aaron@web-presence.biz:First ticket"}
-        
-        
-        
-        
-        */
-        // let [itemizedLabels, setItemizedLabels] = useState([]);
-
-        //  let tempYear = document.querySelector("select[name='eventYear']").value;
-        /* axios.get("/api/invoices/get-invoices/" + props.activeTicket, props.config).then(
-             (res) => {
-                 console.log("JSON.stringify(res.data): " + JSON.stringify(res.data));
-
-                 setAmounts((amounts) => tempAmounts);
-                 setLabels((labels) => tempLabels);
-                 setItemsSum((itemsSum) => prepItemSum);
-                 setSavedInvoices((savedInvoices) => res.data);
- 
-             }, (error) => {
-                 console.log(error);
-             }
-         )*/
     }
-
-
-
-
-
-
-
 
     useEffect(() => {
         if (loaded === false) {

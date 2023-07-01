@@ -218,7 +218,7 @@ const WorkFlow = (props) => {
 
                                 let newData = {
                                     ticketId: whichTicket,
-                                    title: encodeURIComponent(props.userEmail + " " + func + "ed ticket: " + whichTicket.substring(whichTicket.lastIndexOf(":") + 1, whichTicket.length).replace(/[!'()*]/g, escape) + ": " + timestamp()),
+                                    title: encodeURIComponent(timestamp() + ":" + props.userEmail + " " + func + "ed ticket: " + whichTicket.substring(whichTicket.lastIndexOf(":") + 1, whichTicket.length).replace(/[!'()*]/g, escape)),
                                     message: encodeURIComponent(props.userEmail + " just performed a step " + func)
                                 }
                                 axios.post("api/messages/post-message/", newData, props.config).then(

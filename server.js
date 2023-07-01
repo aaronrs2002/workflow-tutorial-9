@@ -115,8 +115,7 @@ app.post("/login", (req, res) => {
                 success: 1,
                 message: "Login Successful",
                 token: jsontoken,
-                id: results.id,
-                userData: results
+                id: results.id
             })
         } else {
             return res.json({

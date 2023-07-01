@@ -23,6 +23,11 @@ footer {
   height: auto;
 }
 
+#clockInOutWindow {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
 div.animated[role="alert"] {
   margin-top: 5%;
   position: fixed;
@@ -135,12 +140,12 @@ div.animated[role="alert"] {
   }
 
 
-  .chartHeightMatch {
+  .chartHeightMatch,
+  #clockInOutWindow {
     max-height: inherit;
     overflow-y: inherit;
 
   }
-
 
 
 }

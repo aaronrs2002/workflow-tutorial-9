@@ -124,6 +124,28 @@ const TicketBuilder = (props) => {
         )
 
     }
+    const postSuccess = (whichTicket) => {
+        let newData = {
+            ticketId: whichTicket,
+            title: encodeURIComponent(timestamp() + ":" + props.userEmail + ": " + func),
+            message: props.userEmail + " " + func + "ed ticket: " + whichTicket
+        }
+        axios.post("api/messages/post-message/", newData, props.config).then(
+            (res) => {
+                if (res.data.affectedRows === 0) {
+                    props.showAlert("That did not update.", "warning");
+                } else {
+                    props.showAlert(whichTicket + " updated.", "success");
+                    sessionStorage.removeItem("activeTicket");
+                    props.getTickets(props.userEmail);
+                    resetFunction("edit");
+                    props.getMessages("reset");
+                }
+            }, (error) => {
+                props.showAlert("There was an error sending the update message: " + error, "danger");
+            }
+        )
+    }
 
     const editTicket = () => {
         let whichTicket = document.querySelector("[name='ticketList']").value;
@@ -153,11 +175,8 @@ const TicketBuilder = (props) => {
                 (res) => {
 
                     if (res.data.affectedRows >= 1) {
-                        props.showAlert(document.querySelector("[name='ticketTitle']").value + " updated.", "success");
-                        sessionStorage.removeItem("activeTicket");
-                        props.getTickets(props.userEmail);
-                        resetFunction("edit");
-                        props.getMessages("reset");
+                        postSuccess(ticketEdit);
+
 
 
                         updateInvoices(ticketEdit, props.activeTicket);

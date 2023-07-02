@@ -63,12 +63,11 @@ const ClockInOut = (props) => {
 
                     let tempHours = [];
 
-                    console.log("JSON.stringify(res.data[0].hours): " + JSON.stringify(res.data[0].hours));
-                    console.log("(typeof res.data[0].hours): " + (typeof res.data[0].hours));
+
                     res.data[0].hours = JSON.parse(res.data[0].hours);
 
                     for (let i = 0; i < res.data[0].hours.length; i++) {
-                        console.log("res.data[0].hours[i].employee: " + res.data[0].hours[i].employee + " - props.userEmail: " + props.userEmail);
+
                         if (res.data[0].hours[i].employee === props.userEmail) {
                             tempHours.push(res.data[0].hours[i]);
                         }
@@ -127,7 +126,7 @@ const ClockInOut = (props) => {
             getTotal(tempInOrOut);
 
             tempInOrOut = timeClock;
-            console.log("JSON.stringify(tempInOrOut): " + JSON.stringify(tempInOrOut));
+
 
             if (tempInOrOut[tempInOrOut.length - 1].timeOut === "noTimeYet") {
                 setClockedIn((clockedIn) => true);
@@ -180,7 +179,7 @@ const ClockInOut = (props) => {
                     populateFields();
                 }
                 let currentTime = timestamp();
-                console.log("currentTime: " + currentTime);
+
                 if (document.querySelector("[name='Timeclock-select-year']")) { document.querySelector("[name='Timeclock-select-year']").value = currentTime.substring(0, 4); }
                 if (document.querySelector("[name='Timeclock-select-month']")) { document.querySelector("[name='Timeclock-select-month'] option[value='" + currentTime.substring(5, 7) + "']").selected = true; }
                 if (document.querySelector("[name='Timeclock-select-day']")) { document.querySelector("[name='Timeclock-select-day'] option[value='" + currentTime.substring(8, 10) + "']").selected = true; }
@@ -225,12 +224,7 @@ const ClockInOut = (props) => {
 
             <div className="col-md-12  ">
 
-                <div className="list-group  hide">
-                    <h2>Clock IN/OUT </h2>
-                    {clockedIn === false ?
-                        <button type="button" className="list-group-item list-group-item-success" onClick={() => inOut("in", true)}>Clock In</button> :
-                        <button type="button" className="list-group-item list-group-item-danger" onClick={() => inOut("out", true)}>Clock Out</button>}
-                </div>
+
                 <input type="text" name="filter" className="form-control" placeholder="Filter hours" onChange={() => filterHours()} />
                 <ul className="list-group" id="clockInOutWindow">
                     {(typeof timeClock) === "object" && timeClock !== null ?

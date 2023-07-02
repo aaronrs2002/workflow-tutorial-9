@@ -98,7 +98,6 @@ router.delete("/delete-ticket/:ticketId", checkToken, (req, res) => {
 
 //SERVER SIDE EMPLOYEE ROUTES
 router.put("/add-hours", checkToken, (req, res) => {
-    console.log("JSON.stringify(req.body) ATTENDEE HOURS:" + JSON.stringify(req.body));
 
     let sql = `UPDATE tickets SET hours = '${req.body.hours}' WHERE ticketId = '${req.body.ticketId}'`;
     let query = db.query(sql, (err, result) => {

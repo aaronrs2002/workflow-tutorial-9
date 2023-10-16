@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "jwt login framework",
   "main": "server.js",
+  "engines": {
+    "node": "16.18.0",
+    "npm": "8.19.2"
+  },
   "scripts": {
     "client-install": "npm install --prefix client",
     "start": "node server.js",

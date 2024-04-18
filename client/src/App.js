@@ -75,6 +75,7 @@ function App() {
           showAlert("No data yet", "info");
         } else {
           setTicketInfo((ticketInfo) => res.data);
+
         }
 
       }, (error) => {

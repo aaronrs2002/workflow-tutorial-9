@@ -6,8 +6,8 @@ const { resolve } = require("path");
 
 
 //SERVER SIDE GET MESSAGES REGARDING SPECIFIC TICKET
-router.get("/get-messages/:ticketId", checkToken, (req, res) => {
-    let sql = `SELECT * FROM messages WHERE ticketId = '${req.params.ticketId}'`;
+router.get("/get-messages/:uuid", checkToken, (req, res) => {
+    let sql = `SELECT * FROM messages WHERE uuid = '${req.params.uuid}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log(err);
@@ -26,7 +26,8 @@ router.post("/post-message", checkToken, (req, res) => {
         {
             ticketId: req.body.ticketId,
             title: req.body.title,
-            message: req.body.message
+            message: req.body.message,
+            uuid: req.body.uuid
         },
 
         (err, result) => {

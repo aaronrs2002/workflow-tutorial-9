@@ -71,16 +71,16 @@ const ClockInOut = (props) => {
 
 
                     let tempHours = [];
-
-
                     res.data[0].hours = JSON.parse(res.data[0].hours);
-
                     for (let i = 0; i < res.data[0].hours.length; i++) {
-
                         if (res.data[0].hours[i].employee === props.userEmail) {
                             tempHours.push(res.data[0].hours[i]);
+                            if (res.data[0].hours[i].timeOut === "noTimeYet") {
+                                setClockedIn((clockedIn) => true);
+                            }
                         }
                     }
+
                     setTimeClock((timeClock) => tempHours);
                     getTotal(tempHours);
                     setEmployeeHours((employeeHours) => tempHours);
@@ -195,10 +195,12 @@ const ClockInOut = (props) => {
                 if (document.querySelector("[name='startHour']")) { document.querySelector("[name='startHour'] option[value='" + currentTime.substring(14, 16) + "']").selected = true; }
                 if (document.querySelector("[name='startMinute']")) { document.querySelector("[name='startMinute'] option[value='" + currentTime.substring(17, 19) + "']").selected = true; }
                 if (document.querySelector("[name='startAmPm']")) { document.querySelector("[name='startAmPm'] option[value='" + currentTime.substring(11, 13) + "']").selected = true; }
-            }, 500);
+            }, 1000);
             setLoaded((loaded) => true);
         }
-    }, []);
+    });
+
+
 
     return (
 
@@ -261,3 +263,4 @@ const ClockInOut = (props) => {
 }
 
 export default ClockInOut;
+

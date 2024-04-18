@@ -220,8 +220,8 @@ const WorkFlow = (props) => {
 
 
                                 let newData = {
-                                    ticketId: whichTicket,
-                                    uuid: sessionStorage.getItem("uuid"),
+                                    ticketId: activeTitle,
+                                    uuid: whichTicket,
                                     title: encodeURIComponent(timestamp() + ":" + props.userEmail + " " + func + "ed ticket: " + activeTitle.substring(activeTitle.lastIndexOf(":") + 1, activeTitle.length).replace(/[!'()*]/g, escape)),
                                     message: encodeURIComponent(props.userEmail + " just performed a step " + func)
                                 }
@@ -293,7 +293,7 @@ const WorkFlow = (props) => {
 
         let tempSteps = [...stepsData, { stepTitle: document.querySelector("[name='stepTitle']").value, stepPrice: document.querySelector("[name='stepPrice']").value, stepStart: tempStepStart, stepEnd: tempStepEnd, tasks: [] }];
 
-        axios.put("/api/workflow/update-workflow/", { ticketId: whichTicket, stepsData: JSON.stringify(tempSteps), uuid: sessionStorage.getItem("uuid") }, props.config).then(
+        axios.put("/api/workflow/update-workflow/", { ticketId: activeTitle, stepsData: JSON.stringify(tempSteps), uuid: whichTicket }, props.config).then(
             (res) => {
                 if (res.data.affectedRows === 0) {
                     props.showAlert("Message: " + res.data.message, "warning");
@@ -493,8 +493,8 @@ const WorkFlow = (props) => {
 
         <React.Fragment>
             <div className="row">
-                <div className="col-md-12">
-                    <TicketList populateFields={populateFields} ticketInfo={props.ticketInfo} />
+                <div className={props.ticketInfo !== null ? "col-md-12" : "hide"}>
+                    <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
                 </div>
 
                 <div className="col-md-12">

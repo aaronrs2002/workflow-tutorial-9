@@ -1,6 +1,7 @@
+//Special thanks to whoever wrote this javvascript that was handed to me
 //start randomize number
-//I am not the author - somebody gave me this: https://github.com/aaronrs2002/random-uid/blob/master/randomize
-var randomize = function (base) {
+function randomizeX() {
+    var base = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
     var d, returnValue, r;
 
     d = new Date().getTime();
@@ -13,13 +14,4 @@ var randomize = function (base) {
 
     return returnValue;
 };
-/*
-* Creates a unique user id
-* @method uuid
-* @return {String} uuid A unique string in a uuid format
-*/
-var uuid = function uuid() {
-    return randomize('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx');
-};
-
-export default uuid;
+export default randomizeX;

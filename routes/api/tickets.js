@@ -4,6 +4,7 @@ const db = require("../../config/db");
 
 const { checkToken } = require("../../auth/token_validation");
 
+
 //SERVER SIDE POST NEW TICKET
 router.post("/add-ticket/", checkToken, (req, res) => {
     let sql = `INSERT INTO tickets SET ?`;
@@ -12,7 +13,8 @@ router.post("/add-ticket/", checkToken, (req, res) => {
         ticketInfo: req.body.ticketInfo,
         priority: req.body.priority,
         bugNewFeature: req.body.bugNewFeature,
-        assignedTo: req.body.assignedTo
+        assignedTo: req.body.assignedTo,
+        uuid: req.body.uuid
     }, (err, result) => {
         if (err) {
             console.log("error: " + err);
@@ -25,9 +27,9 @@ router.post("/add-ticket/", checkToken, (req, res) => {
 
 
 //SERVER SIDE GET ALL USER TICKET INFO
-router.get("/grab-ticket/:ticketId", checkToken, (req, res) => {
-    console.log("req.params.ticketId: " + req.params.ticketId);
-    let sql = `SELECT * FROM tickets WHERE ticketId = '${req.params.ticketId}'`;
+router.get("/grab-ticket/:uuid", checkToken, (req, res) => {
+    console.log("req.params.ticketId: " + req.params.uuid);
+    let sql = `SELECT * FROM tickets WHERE uuid = '${req.params.uuid}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("error: " + err);
@@ -84,8 +86,8 @@ WHERE tickets.ticketId = '${req.body.originalTitle}'`;
 //workflowTaskmanager.invoices.ticketId = '${req.body.ticketId}'
 
 //SERVER SIDE DELETE TICKET
-router.delete("/delete-ticket/:ticketId", checkToken, (req, res) => {
-    let sql = `DELETE FROM tickets WHERE ticketId = '${req.params.ticketId}'`;
+router.delete("/delete-ticket/:uuid", checkToken, (req, res) => {
+    let sql = `DELETE FROM tickets WHERE uuid = '${req.params.uuid}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("error: " + err);
@@ -99,7 +101,7 @@ router.delete("/delete-ticket/:ticketId", checkToken, (req, res) => {
 //SERVER SIDE EMPLOYEE ROUTES
 router.put("/add-hours", checkToken, (req, res) => {
 
-    let sql = `UPDATE tickets SET hours = '${req.body.hours}' WHERE ticketId = '${req.body.ticketId}'`;
+    let sql = `UPDATE tickets SET hours = '${req.body.hours}' WHERE uuid = '${req.body.uuid}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("error: " + err);

@@ -29,7 +29,7 @@ const MessageFeed = (props) => {
         }
 
         let newData = {
-            ticketId: props.activeTicket,
+            ticketId: props.activeTitle,
             uuid: sessionStorage.getItem("uuid"),
             title: encodeURIComponent(timestamp() + ":" + props.userEmail + ":" + document.querySelector("[name='messageTitle']").value).replace(/[!'()*]/g, escape),
             message: encodeURIComponent(document.querySelector("[name='message']").value).replace(/[!'()*]/g, escape)

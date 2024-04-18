@@ -16,7 +16,8 @@ router.post("/add-invoice", checkToken, (req, res) => {
         preTaxTotal: req.body.preTaxTotal,
         invoiceRecipient: req.body.invoiceRecipient,
         invoiceDueDate: req.body.invoiceDueDate,
-        ticketId: req.body.ticketId
+        ticketId: req.body.ticketId,
+        uuid: req.body.uuid
 
     }, (err, result) => {
         if (err) {
@@ -30,9 +31,9 @@ router.post("/add-invoice", checkToken, (req, res) => {
 
 
 //SERVER SIDE GET ALL INVOICES BY ticketId//
-router.get("/get-invoices/:ticketId", checkToken, (req, res) => {
+router.get("/get-invoices/:uuid", checkToken, (req, res) => {
 
-    let sql = `SELECT * FROM invoices WHERE ticketId = '${req.params.ticketId}'`;
+    let sql = `SELECT * FROM invoices WHERE uuid = '${req.params.uuid}'`;
     //'${encodeURIComponent(req.params.title).replace(/[!'()*]/g, escape)}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {

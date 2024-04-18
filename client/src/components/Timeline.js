@@ -264,14 +264,9 @@ const Timeline = (props) => {
 
 
     return (<div className="row">
-        {props.ticketInfo !== null ?
-
-            <div className="col-md-12">
-                {(typeof props.ticketInfo) === "object" ?
-                    <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
-                    : null}
-            </div>
-            : null}
+        <div className={props.ticketInfo !== null ? "col-md-12" : "hide"}>
+            <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
+        </div>
         <div className="col-md-12">
             <h2>Timeline</h2>
         </div>

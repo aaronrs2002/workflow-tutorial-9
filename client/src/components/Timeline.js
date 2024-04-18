@@ -118,14 +118,17 @@ const Timeline = (props) => {
                     props.showAlert("No data yet.", "info");
                     return false;
                 } else {
-
+                    sessionStorage.setItem("uuid", res.data[0].uuid);
                     let selectedTimeline = [];
                     if ((typeof res.data[0].stepsData) === "string") {
                         res.data[0].stepsData = JSON.parse(res.data[0].stepsData);
                     }
-
+                    console.log("JSON.stringify(res.data[0].stepsData): " + JSON.stringify(res.data[0].stepsData));
                     for (let i = 0; i < res.data[0].stepsData.length; i++) {
+
+
                         let colorNumber = Math.floor(Math.random() * tempData.options.fill.colors.length);
+
 
 
                         selectedTimeline.push({
@@ -136,6 +139,10 @@ const Timeline = (props) => {
                             ],
                             fillColor: tempData.options.fill.colors[colorNumber]
                         });
+
+
+
+
                     }
                     //  console.log("JSON.stringify(selectedTimeline): " + JSON.stringify(selectedTimeline));
                     tempData.series[0].data = [...tempData.series[0].data, ...selectedTimeline];
@@ -143,6 +150,9 @@ const Timeline = (props) => {
 
                     setCurrentData((currentData) => tempData);
                 }
+                setTimeout(() => {
+                    setPerformingUpdate((performingUpdate) => false);
+                }, 1000);
             }, (error) => {
                 props.showAlert("Something is broken: " + error, "danger");
             }
@@ -151,26 +161,51 @@ const Timeline = (props) => {
 
     const populateFields = () => {
         let tempData = currentData;
-        setPerformingUpdate((performingUpdate) => true);
 
+        console.log("(typeof props.ticketInfo): " + (typeof props.ticketInfo) + " - props.ticketInfo.length: " + props.ticketInfo.length)
+
+        console.log("JSON.stringify(currentData): " + JSON.stringify(currentData));
+        setPerformingUpdate((performingUpdate) => true);
         let whichTicket = document.querySelector("[name='ticketList']").value;
+        let ticketTitle;
 
         if (whichTicket === "default") {
             props.setActiveTicket((activeTicket) => null);
             sessionStorage.removeItem("activeTicket");
+            sessionStorage.removeItem("uuid");
             return false;
+        } else {
+            sessionStorage.setItem("uuid", document.querySelector("[name='ticketList']").value);
+            props.setActiveTicket((activeTicket) => whichTicket);
+            sessionStorage.setItem("activeTicket", whichTicket);
+            props.getMessages(whichTicket);
+
+            console.log("JSON.stringify(props.ticketInfo): " + JSON.stringify(props.ticketInfo))
+
+            for (let i = 0; i < props.ticketInfo.length; i++) {
+                if (props.ticketInfo[i].uuid === document.querySelector("[name='ticketList']").value) {
+                    console.log("props.ticketInfo[i].ticketId: " + props.ticketInfo[i].ticketId);
+                    ticketTitle = props.ticketInfo[i].ticketId;
+                    sessionStorage.setItem("activeTicket", props.ticketInfo[i].ticketId);
+
+                }
+            }
+
         }
 
 
-        props.setActiveTicket((activeTicket) => whichTicket);
-        sessionStorage.setItem("activeTicket", whichTicket);
-        props.getMessages(whichTicket);
 
-        let endYear = whichTicket.substring(whichTicket.indexOf("-due-") + 5).substring(0, 4);
-        let endMonth = whichTicket.substring(whichTicket.indexOf("-due-") + 5).substring(5, 7);
-        let endDay = whichTicket.substring(whichTicket.indexOf("-due-") + 5).substring(8, 10);
 
-        let starting = whichTicket.substring(0, 10);
+        console.log("ticketTitle: " + ticketTitle)
+
+
+
+
+        let endYear = ticketTitle.substring(ticketTitle.indexOf("-due-") + 5).substring(0, 4);
+        let endMonth = ticketTitle.substring(ticketTitle.indexOf("-due-") + 5).substring(5, 7);
+        let endDay = ticketTitle.substring(ticketTitle.indexOf("-due-") + 5).substring(8, 10);
+
+        let starting = ticketTitle.substring(0, 10);
         let ending = endYear + "-" + endMonth + "-" + endDay;
         let priorityLevel = document.querySelector("select[name='ticketList'] option[value='" + whichTicket + "']").getAttribute("data-level");
 
@@ -188,7 +223,7 @@ const Timeline = (props) => {
         }
 
         let selectedTimeline = [{
-            x: whichTicket.substring(whichTicket.lastIndexOf(":") + 1),
+            x: ticketTitle.substring(ticketTitle.lastIndexOf(":") + 1),
             y: [
                 new Date(starting).getTime(),
                 new Date(ending).getTime()
@@ -201,26 +236,31 @@ const Timeline = (props) => {
 
         setCurrentData((currentData) => tempData);
         grabStepDates(whichTicket);
-        setTimeout(() => {
-            setPerformingUpdate((performingUpdate) => false);
-        }, 1000);
+
     }
 
+
     useEffect(() => {
-        if (loaded === false) {
-            if (props.ticketInfo === null) {
-                props.getTickets(props.userEmail);
-            }
+
+        if (props.ticketInfo === null) {
+            props.getTickets(props.userEmail);
+        }
+        if (loaded === false && props.ticketInfo) {
+
+
+
             setTimeout(() => {
-                if (sessionStorage.getItem("activeTicket")) {
-                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
+                if (sessionStorage.getItem("uuid")) {
+                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
                     populateFields();
+                } else {
+                    props.showAlert("I am not sure which ticket you are on.", "warning");
+                    props.getMessages("reset");
                 }
             }, 500);
             setLoaded((loaded) => true);
         }
     }, []);
-
 
 
     return (<div className="row">

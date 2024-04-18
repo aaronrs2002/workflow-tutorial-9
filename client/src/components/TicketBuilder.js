@@ -13,6 +13,8 @@ const TicketBuilder = (props) => {
     let [loaded, setLoaded] = useState(false);
     let [confirm, setConfirm] = useState("");
     let priorityLevels = ["all", "low", "medium", "high", "critical"];
+    let [uuid, setUuid] = useState();
+    let [activeTitle, setActiveTitle] = useState("default");
 
     const resetFunction = (whatFunc) => {
         props.setActiveTicket((activeTicket) => null);
@@ -39,8 +41,22 @@ const TicketBuilder = (props) => {
 
             return false;
         }
-        props.setActiveTicket((activeTicket) => whichTicket);
-        sessionStorage.setItem("uuid", whichTicket);
+        for (let i = 0; i < props.ticketInfo.length; i++) {
+            try {
+                if (whichTicket === props.ticketInfo[i].uuid) {
+                    setUuid((uuid) => whichTicket);
+                    props.setActiveTicket((activeTicket) => whichTicket);
+                    sessionStorage.setItem("uuid", whichTicket);
+                    setActiveTitle((activeTitle => props.ticketInfo[i].ticketId));
+                    sessionStorage.setItem("activeTitle", props.ticketInfo[i].ticketId);
+                    props.getMessages(whichTicket);
+                }
+            } catch (error) {
+                console.log("I don't loke this one: " + error);
+
+            }
+        }
+
 
         axios.get("api/tickets/grab-ticket/" + whichTicket, props.config).then(
             (res) => {
@@ -186,7 +202,7 @@ const TicketBuilder = (props) => {
             return false;
         } else {
             const dueDate = document.querySelector("[name='due-select-year']").value + "-" + document.querySelector("[name='due-select-month']").value + "-" + document.querySelector("[name='due-select-day']").value
-            let ticketEdit = document.querySelector("[name='ticketList']").value;
+            let ticketEdit = activeTitle;
             ticketEdit = ticketEdit.substring(0, ticketEdit.indexOf(":") + 3) + "-due-" + dueDate + ":" + props.userEmail + ":" + document.querySelector("[name='ticketTitle']").value
 
             let tkObj = {
@@ -195,7 +211,7 @@ const TicketBuilder = (props) => {
                 priority: document.querySelector("[name='priority']").value,
                 bugNewFeature: document.querySelector("[name='bugNewFeature']").value,
                 assignedTo: document.querySelector("[name='assignedTo']").value,
-                originalTitle: props.activeTicket
+                originalTitle: activeTitle
             }
             axios.put("/api/tickets/update-ticket/", tkObj, props.config).then(
                 (res) => {
@@ -205,7 +221,7 @@ const TicketBuilder = (props) => {
 
 
 
-                        updateInvoices(ticketEdit, props.activeTicket);
+                        updateInvoices(ticketEdit, activeTitle);
 
                     } else {
                         props.showAlert("Something went wrong", "danger");
@@ -266,57 +282,38 @@ const TicketBuilder = (props) => {
 
 
     useEffect(() => {
-        if (loaded === false) {
-            if (props.ticketInfo === null) {
-                props.getTickets(props.userEmail);
-            }
 
-            const checkForMenu = () => {
-                try {
-                    if (document.querySelector("select[name='ticketList']").length !== null) {
-                        return true;
-                    }
-                } catch (error) {
-                    return false;
+        if (props.ticketInfo === null) {
+            props.getTickets(props.userEmail);
+        }
+        if (loaded === false && props.ticketInfo) {
+
+
+
+            setTimeout(() => {
+                if (sessionStorage.getItem("uuid")) {
+                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
+                    setUuid((uuid) => sessionStorage.getItem("uuid"))
+                    populateFields();
+                } else {
+                    props.showAlert("I am not sure which ticket you are on.", "warning");
+                    props.getMessages("reset");
                 }
-            }
-            while (checkForMenu === false) {
-                setTimeout(() => {
-                    checkForMenu();
-                }, 500);
-            }
-
-            if (checkForMenu() === true) {
-                document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
-                populateFields();
-            }
-
-            /* setTimeout(() => {
-                 if (sessionStorage.getItem("activeTicket")) {
-                     document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
-                     populateFields();
-                 }
-             }, 500);*/
+            }, 500);
             setLoaded((loaded) => true);
         }
-
-
     }, []);
 
 
 
 
 
-
-
-
-
     return (<div className="row">
-        {props.ticketInfo !== null && func !== "add" ?
-            <div className="col-md-6">
-                <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
-            </div> : null
-        }
+
+        <div className={props.ticketInfo !== null && func !== "add" ? "col-md-6" : "hide"}>
+            <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
+        </div>
+
         {props.ticketInfo !== null && func !== "add" ?
             <div className="col-md-6">
                 <select className="form-control text-capitalize" name="priorityFilter" onChange={() => filterTickets()}>

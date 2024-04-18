@@ -15,6 +15,7 @@ const WorkFlow = (props) => {
     let [activeTaskList, setActiveTaskList] = useState("add/delete tasks");
     let [ticketSelected, setTicketSelected] = useState("default");
     let [existingData, setExistingData] = useState(false);
+    let [activeTitle, setActiveTitle] = useState("default");
 
     const fillStepFields = (step) => {
 
@@ -53,17 +54,18 @@ const WorkFlow = (props) => {
             props.showAlert("Wich ticket?", "warning");
             props.setActiveTicket((activeTicket) => null);
             setStepsData((stepsData) => []);
-            sessionStorage.removeItem("activeTicket");
+            sessionStorage.removeItem("activeTitle");
             return false;
         }
 
         for (let i = 0; i < props.ticketInfo.length; i++) {
-            if (whichTicket === props.ticketInfo[i].ticketId) {
+            if (whichTicket === props.ticketInfo[i].uuid) {
                 selectedNum = i;
+                setActiveTitle((activeTitle) => props.ticketInfo[i].ticketId)
             }
         }
         props.setActiveTicket((activeTicket) => whichTicket);
-        sessionStorage.setItem("activeTicket", whichTicket);
+        sessionStorage.setItem("activeTitle", props.ticketInfo[selectedNum].ticketId);
         //CLIENT SIDE GET INFO BASED ON A SPECIFIC TICKET
         axios.get("/api/workflow/get-workflow/" + whichTicket, props.config).then(
             (res) => {
@@ -95,6 +97,7 @@ const WorkFlow = (props) => {
                             resetFields();
                             setActiveStep((activeStep) => null);
                             setFunc((func) => "add");
+                            sessionStorage.setItem("uuid", res.data[0].uuid);
                         }
                     } catch (error) {
                         console.log("worked around " + error);
@@ -133,7 +136,7 @@ const WorkFlow = (props) => {
 
 
         let whichTicket = document.querySelector("[name='ticketList']").value;
-        setTicketSelected((ticketSelected) => whichTicket);
+        setTicketSelected((ticketSelected) => document.querySelector("select[name='ticketList'] option"));
 
         let tempStepData = stepsData;
         if (newStep === false) {
@@ -190,10 +193,10 @@ const WorkFlow = (props) => {
         }
 
 
-        axios.put("/api/workflow/update-workflow/", { ticketId: document.querySelector("[name='ticketList']").value, stepsData: JSON.stringify(tempStepData) }, props.config).then(
+        axios.put("/api/workflow/update-workflow/", { uuid: sessionStorage.getItem("uuid"), stepsData: JSON.stringify(tempStepData) }, props.config).then(
             (res) => {
                 if (res.data.affectedRows === 0) {
-                    props.showAlert("Update failed.", "warning");
+                    props.showAlert("Nothing was updated in the database. ", "warning");
                 } else {
                     setActiveStep((activeStep) => []);
                     populateFields();
@@ -208,7 +211,7 @@ const WorkFlow = (props) => {
 
                     //OPTION 1
 
-                    axios.put("/api/workflow/update-workflow/", { ticketId: whichTicket, stepsData: JSON.stringify(tempStepData) }, props.config).then(
+                    axios.put("/api/workflow/update-workflow/", { uuid: sessionStorage.getItem("uuid"), stepsData: JSON.stringify(tempStepData) }, props.config).then(
                         (res) => {
                             if (res.data.affectedRows === 0) {
                                 props.showAlert("Update failed.", "warning");
@@ -218,7 +221,8 @@ const WorkFlow = (props) => {
 
                                 let newData = {
                                     ticketId: whichTicket,
-                                    title: encodeURIComponent(timestamp() + ":" + props.userEmail + " " + func + "ed ticket: " + whichTicket.substring(whichTicket.lastIndexOf(":") + 1, whichTicket.length).replace(/[!'()*]/g, escape)),
+                                    uuid: sessionStorage.getItem("uuid"),
+                                    title: encodeURIComponent(timestamp() + ":" + props.userEmail + " " + func + "ed ticket: " + activeTitle.substring(activeTitle.lastIndexOf(":") + 1, activeTitle.length).replace(/[!'()*]/g, escape)),
                                     message: encodeURIComponent(props.userEmail + " just performed a step " + func)
                                 }
                                 axios.post("api/messages/post-message/", newData, props.config).then(
@@ -289,7 +293,7 @@ const WorkFlow = (props) => {
 
         let tempSteps = [...stepsData, { stepTitle: document.querySelector("[name='stepTitle']").value, stepPrice: document.querySelector("[name='stepPrice']").value, stepStart: tempStepStart, stepEnd: tempStepEnd, tasks: [] }];
 
-        axios.post("/api/workflow/add-workflow/", { ticketId: whichTicket, stepsData: JSON.stringify(tempSteps) }, props.config).then(
+        axios.put("/api/workflow/update-workflow/", { ticketId: whichTicket, stepsData: JSON.stringify(tempSteps), uuid: sessionStorage.getItem("uuid") }, props.config).then(
             (res) => {
                 if (res.data.affectedRows === 0) {
                     props.showAlert("Message: " + res.data.message, "warning");
@@ -464,15 +468,20 @@ const WorkFlow = (props) => {
     }
 
 
+
     useEffect(() => {
-        if (loaded === false) {
-            if (props.ticketInfo === null) {
-                props.getTickets(props.userEmail);
-            }
+
+        if (props.ticketInfo === null) {
+            props.getTickets(props.userEmail);
+        }
+        if (loaded === false && props.ticketInfo) {
             setTimeout(() => {
-                if (sessionStorage.getItem("activeTicket") && props.ticketInfo !== null) {
-                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
+                if (sessionStorage.getItem("uuid")) {
+                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
                     populateFields();
+                } else {
+                    props.showAlert("I am not sure which ticket you are on.", "warning");
+                    props.getMessages("reset");
                 }
             }, 500);
             setLoaded((loaded) => true);

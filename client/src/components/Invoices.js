@@ -29,6 +29,8 @@ const Invoices = (props) => {
     let [itemizedCosts, setItemizedCosts] = useState([]);
     let [itemizedLabels, setItemizedLabels] = useState([]);
     let [itemsSum, setItemsSum] = useState(0);
+    let [uuid, setUuid] = useState();
+    let [activeTitle, setActiveTitle] = useState("default");
 
     const buildItemChart = (theObj) => {
         let tempCosts = [];
@@ -195,7 +197,8 @@ const Invoices = (props) => {
                 itemizedList: JSON.stringify(prepList),
                 invoiceRecipient: recipientInfo,
                 invoiceDueDate: tempDueDate,
-                ticketId: props.activeTicket
+                ticketId: props.activeTitle,
+                uuid: uuid
             }
             axios.post("api/invoices/add-invoice", sendData, props.config).then(
                 (res) => {
@@ -221,15 +224,27 @@ const Invoices = (props) => {
         let whichTicket = document.querySelector("[name='ticketList']").value;
         if (whichTicket === "default") {
             props.setActiveTicket((activeTicket) => null);
-            sessionStorage.removeItem("activeTicket");
+
             setAmounts((amounts) => []);
             setLabels((labels) => []);
             return false;
-
         } else {
 
-            props.setActiveTicket((activeTicket) => whichTicket);
-            sessionStorage.setItem("activeTicket", whichTicket);
+            for (let i = 0; i < props.ticketInfo.length; i++) {
+                try {
+                    if (whichTicket === props.ticketInfo[i].uuid) {
+                        setUuid((uuid) => whichTicket);
+                        props.setActiveTicket((activeTicket) => whichTicket);
+                        sessionStorage.setItem("uuid", whichTicket);
+                        setActiveTitle((activeTitle => props.ticketInfo[i].ticketId));
+                        sessionStorage.setItem("activeTitle", props.ticketInfo[i].ticketId);
+                        props.getMessages(whichTicket);
+                    }
+                } catch (error) {
+                    console.log("I don't loke this one: " + error);
+
+                }
+            }
 
             axios.get("/api/invoices/get-invoices/" + whichTicket, props.config).then(
                 (res) => {
@@ -259,6 +274,7 @@ const Invoices = (props) => {
                     setLabels((labels) => tempLabels);
                     setItemsSum((itemsSum) => prepItemSum);
                     setSavedInvoices((savedInvoices) => res.data);
+
 
                 }, (error) => {
                     console.log(error);
@@ -303,14 +319,22 @@ const Invoices = (props) => {
     }
 
     useEffect(() => {
-        if (loaded === false) {
-            if (props.ticketInfo === null) {
-                props.getTickets(props.userEmail);
-            }
+
+        if (props.ticketInfo === null) {
+            props.getTickets(props.userEmail);
+        }
+        if (loaded === false && props.ticketInfo) {
+
+
+
             setTimeout(() => {
-                if (sessionStorage.getItem("activeTicket")) {
-                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
+                if (sessionStorage.getItem("uuid")) {
+                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
+                    setUuid((uuid) => sessionStorage.getItem("uuid"))
                     populateFields();
+                } else {
+                    props.showAlert("I am not sure which ticket you are on.", "warning");
+                    props.getMessages("reset");
                 }
             }, 500);
             setLoaded((loaded) => true);

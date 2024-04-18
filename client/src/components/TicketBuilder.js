@@ -4,6 +4,7 @@ import timestamp from "./timestamp";
 import Validate from "./Validate";
 import TicketList from "./TicketList";
 import DateSelector from "./DateSelector";
+import randomizeX from "./uuid";
 
 
 
@@ -35,11 +36,11 @@ const TicketBuilder = (props) => {
         let whichTicket = document.querySelector("[name='ticketList']").value;
         if (whichTicket === "default") {
             props.setActiveTicket((activeTicket) => null);
-            sessionStorage.removeItem("activeTicket");
+
             return false;
         }
         props.setActiveTicket((activeTicket) => whichTicket);
-        sessionStorage.setItem("activeTicket", whichTicket);
+        sessionStorage.setItem("uuid", whichTicket);
 
         axios.get("api/tickets/grab-ticket/" + whichTicket, props.config).then(
             (res) => {
@@ -50,6 +51,8 @@ const TicketBuilder = (props) => {
                     document.querySelector("[name='priority']").value = res.data[0].priority;
                     document.querySelector("[name='bugNewFeature']").value = res.data[0].bugNewFeature;
                     document.querySelector("[name='assignedTo']").value = res.data[0].assignedTo;
+
+
 
 
                     document.querySelector("[name='due-select-year']").value = res.data[0].ticketId.substring(res.data[0].ticketId.lastIndexOf("-due-") + 5).substring(0, 4);
@@ -67,29 +70,51 @@ const TicketBuilder = (props) => {
         )
     }
 
+    const buildWorkFlow = (ticket, id) => {
+        axios.post("/api/workflow/add-workflow/", { ticketId: ticket, stepsData: "[]", uuid: id }, props.config).then(
+            (res) => {
+                if (res.data.affectedRows === 0) {
+                    console.log("Workflow Not created.")
+
+                } else {
+                    console.log("Workflow  created.")
+                }
+            }, (error) => {
+                props.showAlert("Workflow was not created: " + error, "danger");
+            }
+        );
+    }
+
     const addTicket = () => {
+        const dueDate = document.querySelector("[name='due-select-year']").value + "-" + document.querySelector("[name='due-select-month']").value + "-" + document.querySelector("[name='due-select-day']").value
+        let tempUUID = randomizeX();
+        let tempTicketID = timestamp() + "-due-" + dueDate + ":" + props.userEmail + ":" + document.querySelector("[name='ticketTitle']").value;
         Validate(["ticketTitle", "ticketInfo", "priority", "bugNewFeature", "assignedTo", "due-select-year", "due-select-month", "due-select-day"]);
 
         if (document.querySelector(".error")) {
             props.showAlert("You are missing fields information.", "danger");
             return false;
         } else {
-            const dueDate = document.querySelector("[name='due-select-year']").value + "-" + document.querySelector("[name='due-select-month']").value + "-" + document.querySelector("[name='due-select-day']").value
+
             let tkObj = {
-                ticketId: timestamp() + "-due-" + dueDate + ":" + props.userEmail + ":" + document.querySelector("[name='ticketTitle']").value,
-                ticketInfo: document.querySelector("[name='ticketInfo']").value,
+                ticketId: tempTicketID,
+                ticketInfo: document.querySelector("[name='ticketInfo']").value.replace(/[&\/\\#,+()$~%'"*?<>{}@“]/g, ''),
                 priority: document.querySelector("[name='priority']").value,
                 bugNewFeature: document.querySelector("[name='bugNewFeature']").value,
-                assignedTo: document.querySelector("[name='assignedTo']").value
+                assignedTo: document.querySelector("[name='assignedTo']").value,
+                uuid: tempUUID
 
             }
             axios.post("/api/tickets/add-ticket/", tkObj, props.config).then(
                 (res) => {
 
                     if (res.data.affectedRows >= 1) {
+                        sessionStorage.setItem("uuid", tempUUID);
                         props.showAlert(document.querySelector("[name='ticketTitle']").value + " added.", "success");
                         props.getTickets(props.userEmail);
                         resetFunction("add");
+                        buildWorkFlow(tempTicketID, tempUUID);
+
                     } else {
                         props.showAlert("Something went wrong: " + res.data.message, "danger");
                     }
@@ -106,7 +131,7 @@ const TicketBuilder = (props) => {
     const updateInvoices = (newTicketId, originalTicketId) => {
         let updateObj = {
             ticketId: newTicketId,
-            originalId: originalTicketId
+            originalId: originalTicketId,
         }
 
         axios.put("/api/invoices/update-invoices-ticketId/", updateObj, props.config).then(
@@ -115,11 +140,12 @@ const TicketBuilder = (props) => {
                     console.log("Invoices updated: " + JSON.stringify(res.data));
 
                 } else {
-                    props.showAlert("Invoice tickedIds did not update.", "danger");
+                    console.log("Invoices updated- there is a possibliuty that this ticket has no invoices yet: " + JSON.stringify(res.data));
+
                 }
 
             }, (error) => {
-
+                props.showAlert("Server error on invoice update.", "danger");
             }
         )
 
@@ -136,7 +162,7 @@ const TicketBuilder = (props) => {
                     props.showAlert("That did not update.", "warning");
                 } else {
                     props.showAlert(whichTicket + " updated.", "success");
-                    sessionStorage.removeItem("activeTicket");
+
                     props.getTickets(props.userEmail);
                     resetFunction("edit");
                     props.getMessages("reset");
@@ -165,7 +191,7 @@ const TicketBuilder = (props) => {
 
             let tkObj = {
                 ticketId: ticketEdit,
-                ticketInfo: document.querySelector("[name='ticketInfo']").value,
+                ticketInfo: document.querySelector("[name='ticketInfo']").value.replace(/[&\/\\#,+()$~%'"*?<>{}@“]/g, ''),
                 priority: document.querySelector("[name='priority']").value,
                 bugNewFeature: document.querySelector("[name='bugNewFeature']").value,
                 assignedTo: document.querySelector("[name='assignedTo']").value,
@@ -205,7 +231,7 @@ const TicketBuilder = (props) => {
 
             (res) => {
                 if (res.data.affectedRows > 0) {
-                    sessionStorage.removeItem("activeTicket");
+
                     props.showAlert("Success in deleting.", "info");
                     props.getTickets(props.userEmail);
                     resetFunction("delete");
@@ -244,24 +270,54 @@ const TicketBuilder = (props) => {
             if (props.ticketInfo === null) {
                 props.getTickets(props.userEmail);
             }
-            setTimeout(() => {
-                if (sessionStorage.getItem("activeTicket")) {
-                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
-                    populateFields();
+
+            const checkForMenu = () => {
+                try {
+                    if (document.querySelector("select[name='ticketList']").length !== null) {
+                        return true;
+                    }
+                } catch (error) {
+                    return false;
                 }
-            }, 500);
+            }
+            while (checkForMenu === false) {
+                setTimeout(() => {
+                    checkForMenu();
+                }, 500);
+            }
+
+            if (checkForMenu() === true) {
+                document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
+                populateFields();
+            }
+
+            /* setTimeout(() => {
+                 if (sessionStorage.getItem("activeTicket")) {
+                     document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
+                     populateFields();
+                 }
+             }, 500);*/
             setLoaded((loaded) => true);
         }
+
+
     }, []);
 
 
+
+
+
+
+
+
+
     return (<div className="row">
-        {props.ticketInfo !== null ?
+        {props.ticketInfo !== null && func !== "add" ?
             <div className="col-md-6">
                 <TicketList ticketInfo={props.ticketInfo} populateFields={populateFields} />
             </div> : null
         }
-        {props.ticketInfo !== null ?
+        {props.ticketInfo !== null && func !== "add" ?
             <div className="col-md-6">
                 <select className="form-control text-capitalize" name="priorityFilter" onChange={() => filterTickets()}>
                     {priorityLevels ? priorityLevels.map((level, i) => {

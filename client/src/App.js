@@ -29,6 +29,7 @@ function App() {
   let [ticketInfo, setTicketInfo] = useState(null);
   let [activeTicket, setActiveTicket] = useState(null);
   let [feed, setFeed] = useState([]);
+  let [activeTitle, setActiveTitle] = useState("default");
 
   const config = {
     headers: {
@@ -52,6 +53,22 @@ function App() {
       setFeed((feed) => []);
       return false;
     }
+
+    for (let i = 0; i < ticketInfo.length; i++) {
+      try {
+        if (whichTicket === ticketInfo[i].uuid) {
+          setActiveTitle((activeTitle => ticketInfo[i].ticketId));
+          sessionStorage.setItem("activeTitle", ticketInfo[i].ticketId);
+
+        }
+      } catch (error) {
+        console.log("no ticket info: " + error);
+
+      }
+    }
+
+
+
     setFeed((feed) => []);
     axios.get("/api/messages/get-messages/" + whichTicket, config).then(
       (res) => {
@@ -234,7 +251,7 @@ function App() {
             {activeModule === "invoices" ? <Invoices ticketInfo={ticketInfo} showAlert={showAlert} config={config} userEmail={userEmail} getTickets={getTickets} setActiveTicket={setActiveTicket} activeTicket={activeTicket} getMessages={getMessages} /> : null}
             {activeModule === "clockInOut" ? <ClockInOut ticketInfo={ticketInfo} showAlert={showAlert} config={config} userEmail={userEmail} getTickets={getTickets} setActiveTicket={setActiveTicket} activeTicket={activeTicket} getMessages={getMessages} /> : null}
 
-            {activeTicket !== null ? <MessageFeed showAlert={showAlert} config={config} userEmail={userEmail} activeTicket={activeTicket} feed={feed} getMessages={getMessages} /> : <h2>Select a ticket to post a message.</h2>}
+            {activeTicket !== null ? <MessageFeed showAlert={showAlert} config={config} activeTitle={activeTitle} userEmail={userEmail} activeTicket={activeTicket} feed={feed} getMessages={getMessages} /> : <h2>Select a ticket to post a message.</h2>}
           </div>
           <footer className="footer mt-auto py-3 px-3 bg-dark text-muted">
             <div className="row">

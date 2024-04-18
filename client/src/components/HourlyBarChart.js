@@ -58,7 +58,7 @@ const HourlyBarChart = (props) => {
                 let dateHere = NumberToTime(new Date(data[i].timeIn));
                 dateHere = dateHere.toString();
                 dateHere = dateHere.toString().substring(0, 10)
-                if (daysList.indexOf(dateHere) === -1) {
+                if (daysList.indexOf(dateHere)) {
                     daysList.push(dateHere);
                     daysTotal.push(0);
                 }
@@ -73,6 +73,7 @@ const HourlyBarChart = (props) => {
                         }
                     }
                 }
+
                 tempOptions.series[0].data = daysTotal;
                 tempOptions.xaxis.categories = daysList;
                 setOptions((options) => tempOptions);
@@ -85,6 +86,7 @@ const HourlyBarChart = (props) => {
     useEffect(() => {
         if (loaded === false && (typeof props.employeeHours) === "object" && props.employeeHours.length > 0) {
             addUpDayTotals(props.employeeHours);
+
             setLoaded((loaded) => true);
         }
     });

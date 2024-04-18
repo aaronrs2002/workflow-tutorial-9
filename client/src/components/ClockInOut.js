@@ -13,6 +13,7 @@ const ClockInOut = (props) => {
     let [clockedIn, setClockedIn] = useState(false);
     let [totalHours, setTotalHours] = useState(0);
     let [employeeHours, setEmployeeHours] = useState([]);
+    let [activeTitle, setActiveTitle] = useState("default");
 
     const getTotal = (data) => {
         let tempTotal = 0;
@@ -49,8 +50,16 @@ const ClockInOut = (props) => {
             sessionStorage.removeItem("activeTicket");
             return false;
         }
+        for (let i = 0; i < props.ticketInfo.length; i++) {
+            if (whichTicket === props.ticketInfo[i].uuid) {
+                setActiveTitle((activeTitle) => props.ticketInfo[i].ticketId);
+                sessionStorage.setItem("activeTitle", props.ticketInfo[i].ticketId);
+                props.getMessages(whichTicket);
+            }
+        }
         props.setActiveTicket((activeTicket) => whichTicket);
-        sessionStorage.setItem("activeTicket", whichTicket);
+
+        sessionStorage.setItem("uuid", whichTicket);
 
         axios.get("api/tickets/grab-ticket/" + whichTicket, props.config).then(
             (res) => {
@@ -139,8 +148,9 @@ const ClockInOut = (props) => {
         }
 
         let putData = {
-            ticketId: whichTicket,
-            hours: JSON.stringify(tempInOrOut)
+            ticketId: activeTitle,
+            hours: JSON.stringify(tempInOrOut),
+            uuid: whichTicket
         }
 
 
@@ -164,18 +174,17 @@ const ClockInOut = (props) => {
     }
 
 
-
-
-
-
     useEffect(() => {
-        if (loaded === false) {
-            if (props.ticketInfo === null) {
-                props.getTickets(props.userEmail);
-            }
+        if (props.ticketInfo === null) {
+            props.getTickets(props.userEmail);
+        }
+
+
+        if (loaded === false && props.ticketInfo) {
+
             setTimeout(() => {
-                if (sessionStorage.getItem("activeTicket")) {
-                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("activeTicket") + "']").selected = true;
+                if (sessionStorage.getItem("uuid")) {
+                    document.querySelector("select[name='ticketList'] option[value='" + sessionStorage.getItem("uuid") + "']").selected = true;
                     populateFields();
                 }
                 let currentTime = timestamp();

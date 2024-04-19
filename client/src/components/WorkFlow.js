@@ -15,6 +15,7 @@ const WorkFlow = (props) => {
     let [activeTaskList, setActiveTaskList] = useState("add/delete tasks");
     let [ticketSelected, setTicketSelected] = useState("default");
     let [existingData, setExistingData] = useState(false);
+    let [uuid, setUuid] = useState();
     let [activeTitle, setActiveTitle] = useState("default");
 
     const fillStepFields = (step) => {
@@ -47,6 +48,9 @@ const WorkFlow = (props) => {
     }
 
     const populateFields = () => {
+        sessionStorage.removeItem("activeTitle");
+        sessionStorage.removeItem("uuid");
+        setStepsData((stepsData) => []);
         let whichTicket = document.querySelector("[name='ticketList']").value;
         let selectedNum;
         setTicketSelected((ticketSelected) => whichTicket);
@@ -60,6 +64,8 @@ const WorkFlow = (props) => {
 
         for (let i = 0; i < props.ticketInfo.length; i++) {
             if (whichTicket === props.ticketInfo[i].uuid) {
+                setUuid((uuid) => whichTicket);
+                sessionStorage.setItem("uuid", props.ticketInfo[i].uuid);
                 selectedNum = i;
                 setActiveTitle((activeTitle) => props.ticketInfo[i].ticketId)
             }
@@ -136,7 +142,7 @@ const WorkFlow = (props) => {
 
 
         let whichTicket = document.querySelector("[name='ticketList']").value;
-        setTicketSelected((ticketSelected) => document.querySelector("select[name='ticketList'] option"));
+        setTicketSelected((ticketSelected) => whichTicket);
 
         let tempStepData = stepsData;
         if (newStep === false) {
@@ -192,10 +198,12 @@ const WorkFlow = (props) => {
 
         }
 
+        let updateObj = { uuid: uuid, stepsData: JSON.stringify(tempStepData) };
 
-        axios.put("/api/workflow/update-workflow/", { uuid: sessionStorage.getItem("uuid"), stepsData: JSON.stringify(tempStepData) }, props.config).then(
+        axios.put("/api/workflow/update-workflow/", updateObj, props.config).then(
             (res) => {
                 if (res.data.affectedRows === 0) {
+                    console.log("updateObj[0].iuud: " + updateObj[0].uuid);
                     props.showAlert("Nothing was updated in the database. ", "warning");
                 } else {
                     setActiveStep((activeStep) => []);
@@ -211,7 +219,7 @@ const WorkFlow = (props) => {
 
                     //OPTION 1
 
-                    axios.put("/api/workflow/update-workflow/", { uuid: sessionStorage.getItem("uuid"), stepsData: JSON.stringify(tempStepData) }, props.config).then(
+                    axios.put("/api/workflow/update-workflow/", { uuid: uuid, stepsData: JSON.stringify(tempStepData) }, props.config).then(
                         (res) => {
                             if (res.data.affectedRows === 0) {
                                 props.showAlert("Update failed.", "warning");
@@ -221,7 +229,7 @@ const WorkFlow = (props) => {
 
                                 let newData = {
                                     ticketId: activeTitle,
-                                    uuid: whichTicket,
+                                    uuid: uuid,
                                     title: encodeURIComponent(timestamp() + ":" + props.userEmail + " " + func + "ed ticket: " + activeTitle.substring(activeTitle.lastIndexOf(":") + 1, activeTitle.length).replace(/[!'()*]/g, escape)),
                                     message: encodeURIComponent(props.userEmail + " just performed a step " + func)
                                 }
@@ -293,7 +301,7 @@ const WorkFlow = (props) => {
 
         let tempSteps = [...stepsData, { stepTitle: document.querySelector("[name='stepTitle']").value, stepPrice: document.querySelector("[name='stepPrice']").value, stepStart: tempStepStart, stepEnd: tempStepEnd, tasks: [] }];
 
-        axios.put("/api/workflow/update-workflow/", { ticketId: activeTitle, stepsData: JSON.stringify(tempSteps), uuid: whichTicket }, props.config).then(
+        axios.put("/api/workflow/update-workflow/", { uuid: uuid, ticketId: activeTitle, stepsData: JSON.stringify(tempSteps) }, props.config).then(
             (res) => {
                 if (res.data.affectedRows === 0) {
                     props.showAlert("Message: " + res.data.message, "warning");

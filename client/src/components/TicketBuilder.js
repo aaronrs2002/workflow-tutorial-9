@@ -17,6 +17,8 @@ const TicketBuilder = (props) => {
     let [activeTitle, setActiveTitle] = useState("default");
 
     const resetFunction = (whatFunc) => {
+        sessionStorage.removeItem("activeTitle");
+        sessionStorage.removeItem("uuid");
         props.setActiveTicket((activeTicket) => null);
         [].forEach.call(document.querySelectorAll("select"), (e) => {
             e.selectedIndex = 0;

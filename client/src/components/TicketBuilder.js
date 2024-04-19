@@ -38,6 +38,7 @@ const TicketBuilder = (props) => {
         let whichTicket = document.querySelector("[name='ticketList']").value;
         if (whichTicket === "default") {
             props.setActiveTicket((activeTicket) => null);
+            resetFunction("add");
 
             return false;
         }

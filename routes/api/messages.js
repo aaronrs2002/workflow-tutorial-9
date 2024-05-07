@@ -7,7 +7,7 @@ const { resolve } = require("path");
 
 //SERVER SIDE GET MESSAGES REGARDING SPECIFIC TICKET
 router.get("/get-messages/:uuid", checkToken, (req, res) => {
-    let sql = `SELECT * FROM messages WHERE uuid = '${req.params.uuid}'`;
+    let sql = `SELECT * FROM messages WHERE uuid = '${req.params.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log(err);
@@ -56,7 +56,7 @@ router.delete("/delete-message/:title", checkToken, (req, res) => {
 
 //SERVER SIDE PUT / EDIT MESSAGE
 router.put("/edit-message", checkToken, (req, res) => {
-    let sql = `UPDATE messages SET message = '${req.body.message}' WHERE title = '${req.body.title}'`;
+    let sql = `UPDATE messages SET message = '${req.body.message.replace(/[&\/\\#,+()$~'"*?<>{}“]/g, '')}' WHERE title = '${req.body.title.replace(/[&\/\\#,+()$~'"*?<>{}“]/g, '')}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log(err);

@@ -26,7 +26,7 @@ router.post("/add-workflow/", checkToken, (req, res) => {
 //SERVER SIDE GET ALL STEPS
 router.get("/get-workflow/:uuid", checkToken, (req, res) => {
 
-    let sql = `SELECT * FROM workflow WHERE uuid = '${req.params.uuid}'`;
+    let sql = `SELECT * FROM workflow WHERE uuid = '${req.params.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("error: " + err);
@@ -39,14 +39,17 @@ router.get("/get-workflow/:uuid", checkToken, (req, res) => {
 
 //SERVER SIDE PUT WORKFLOW STEPS
 router.put("/update-workflow/", checkToken, (req, res) => {
-    let sql = `UPDATE workflow SET stepsData = '${req.body.stepsData}' WHERE uuid = '${req.body.uuid}'`;
-    let query = db.query(sql, (err, result) => {
-        if (err) {
-            console.log("error: " + err);
-        } else {
-            res.send(result);
-        }
-    });
+    if (JSON.parse(req.body.stepsData)) {
+        let sql = `UPDATE workflow SET stepsData = '${req.body.stepsData}' WHERE uuid = '${req.body.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
+        let query = db.query(sql, (err, result) => {
+            if (err) {
+                console.log("error: " + err);
+            } else {
+                res.send(result);
+            }
+        });
+    }
+
 });
 
 

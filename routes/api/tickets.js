@@ -29,7 +29,7 @@ router.post("/add-ticket/", checkToken, (req, res) => {
 //SERVER SIDE GET ALL USER TICKET INFO
 router.get("/grab-ticket/:uuid", checkToken, (req, res) => {
     console.log("req.params.ticketId: " + req.params.uuid);
-    let sql = `SELECT * FROM tickets WHERE uuid = '${req.params.uuid}'`;
+    let sql = `SELECT * FROM tickets WHERE uuid = '${req.params.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("error: " + err);
@@ -42,7 +42,7 @@ router.get("/grab-ticket/:uuid", checkToken, (req, res) => {
 
 //SERVER SIDE GET ALL USER TICKET INFO
 router.get("/get-ticket-info/:email", checkToken, (req, res) => {
-    let emailWithColons = ":" + req.params.email + ":";
+    let emailWithColons = ":" + req.params.email.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '') + ":";
     console.log("emailWithColons: " + emailWithColons);
     let sql = `SELECT * FROM tickets WHERE ticketId LIKE '%${emailWithColons}%'`;
     let query = db.query(sql, (err, result) => {
@@ -64,14 +64,14 @@ ON tickets.ticketId = workflowTaskmanager.messages.ticketId
 LEFT JOIN   workflowTaskmanager.workflow 
 ON workflowTaskmanager.messages.ticketId = workflowTaskmanager.workflow.ticketId   
 SET 
-tickets.ticketInfo = '${req.body.ticketInfo}', 
-tickets.priority = '${req.body.priority}',
-tickets.bugNewFeature = '${req.body.bugNewFeature}', 
-tickets.assignedTo = '${req.body.assignedTo}', 
-tickets.ticketId = '${req.body.ticketId}',
+tickets.ticketInfo = '${req.body.ticketInfo.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}', 
+tickets.priority = '${req.body.priority.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}',
+tickets.bugNewFeature = '${req.body.bugNewFeature.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}', 
+tickets.assignedTo = '${req.body.assignedTo.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}', 
+tickets.ticketId = '${req.body.ticketId.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}',
 workflowTaskmanager.messages.ticketId = tickets.ticketId,
 workflowTaskmanager.workflow.ticketId = tickets.ticketId
-WHERE tickets.ticketId = '${req.body.originalTitle}'`;
+WHERE tickets.ticketId = '${req.body.originalTitle.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
 
 
     let query = db.query(sql, (err, result) => {
@@ -87,7 +87,7 @@ WHERE tickets.ticketId = '${req.body.originalTitle}'`;
 
 //SERVER SIDE DELETE TICKET
 router.delete("/delete-ticket/:uuid", checkToken, (req, res) => {
-    let sql = `DELETE FROM tickets WHERE uuid = '${req.params.uuid}'`;
+    let sql = `DELETE FROM tickets WHERE uuid = '${req.params.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("error: " + err);
@@ -100,15 +100,19 @@ router.delete("/delete-ticket/:uuid", checkToken, (req, res) => {
 
 //SERVER SIDE EMPLOYEE ROUTES
 router.put("/add-hours", checkToken, (req, res) => {
+    console.log("WHAT IS THOS? " + req.body.hours)
+    if (JSON.parse(req.body.hours)) {
+        let sql = `UPDATE tickets SET hours = '${req.body.hours}' WHERE uuid = '${req.body.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
+        let query = db.query(sql, (err, result) => {
+            if (err) {
+                console.log("error: " + err);
+            } else {
+                res.send(result);
+            }
+        })
+    }
 
-    let sql = `UPDATE tickets SET hours = '${req.body.hours}' WHERE uuid = '${req.body.uuid}'`;
-    let query = db.query(sql, (err, result) => {
-        if (err) {
-            console.log("error: " + err);
-        } else {
-            res.send(result);
-        }
-    })
+
 });
 
 

@@ -71,21 +71,26 @@ const ClockInOut = (props) => {
 
 
                     let tempHours = [];
-                    res.data[0].hours = JSON.parse(res.data[0].hours);
-                    for (let i = 0; i < res.data[0].hours.length; i++) {
-                        if (res.data[0].hours[i].employee === props.userEmail) {
-                            tempHours.push(res.data[0].hours[i]);
-                            if (res.data[0].hours[i].timeOut === "noTimeYet") {
-                                setClockedIn((clockedIn) => true);
+                    try {
+                        res.data[0].hours = JSON.parse(res.data[0].hours);
+                        for (let i = 0; i < res.data[0].hours.length; i++) {
+                            if (res.data[0].hours[i].employee === props.userEmail) {
+                                tempHours.push(res.data[0].hours[i]);
+                                if (res.data[0].hours[i].timeOut === "noTimeYet") {
+                                    setClockedIn((clockedIn) => true);
+                                }
                             }
                         }
+
+                        setTimeClock((timeClock) => tempHours);
+                        getTotal(tempHours);
+                        setEmployeeHours((employeeHours) => tempHours);
+
+                        props.getMessages(whichTicket);
+                    } catch (error) {
+                        console.log("ERROR: " + error);
                     }
 
-                    setTimeClock((timeClock) => tempHours);
-                    getTotal(tempHours);
-                    setEmployeeHours((employeeHours) => tempHours);
-
-                    props.getMessages(whichTicket);
                 }
 
             }, (error) => {
@@ -158,7 +163,7 @@ const ClockInOut = (props) => {
         axios.put("/api/tickets/add-hours", putData, props.config).then(
             (res) => {
                 if (res.data.affectedRows === 0) {
-                    props.showAlert("That didn't work: " + res.data.message, "danger");
+                    props.showAlert("That didn't work.", "danger");
                 } else {
                     props.showAlert("Time added.", "success");
                     populateFields();
@@ -263,4 +268,5 @@ const ClockInOut = (props) => {
 }
 
 export default ClockInOut;
+
 

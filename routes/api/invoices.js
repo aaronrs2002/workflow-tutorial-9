@@ -33,7 +33,7 @@ router.post("/add-invoice", checkToken, (req, res) => {
 //SERVER SIDE GET ALL INVOICES BY ticketId//
 router.get("/get-invoices/:uuid", checkToken, (req, res) => {
 
-    let sql = `SELECT * FROM invoices WHERE uuid = '${req.params.uuid}'`;
+    let sql = `SELECT * FROM invoices WHERE uuid = '${req.params.uuid.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`;
     //'${encodeURIComponent(req.params.title).replace(/[!'()*]/g, escape)}'`;
     let query = db.query(sql, (err, result) => {
         if (err) {
@@ -47,7 +47,7 @@ router.get("/get-invoices/:uuid", checkToken, (req, res) => {
 
 //SERVER SIDE UPDATE INVOICE NAME
 router.put("/update-invoices-ticketId/", checkToken, (req, res) => {
-    let sql = `UPDATE invoices SET ticketId = '${req.body.ticketId}' WHERE ticketId = '${req.body.originalId}'`
+    let sql = `UPDATE invoices SET ticketId = '${req.body.ticketId.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}' WHERE ticketId = '${req.body.originalId.replace(/[&\/\\#,+()$~%'"*?<>{}“]/g, '')}'`
     let query = db.query(sql, (err, result) => {
         if (err) {
             console.log("Error :" + err);
